@@ -1,0 +1,14 @@
+.cps-slideshow {
+  display: flex;
+  overflow-x: auto;
+}
+
+.cps-slide {
+  min-width: 300px;
+  margin-right: 10px;
+}
+
+.cps-slide img {
+  width: 100%;
+  height: auto;
+}
