@@ -166,6 +166,10 @@ wp.blocks.registerBlockType("customblock/slideshow", {
     api: {
       type: "string",
       default: "" // Allow users to input a custom URL
+    },
+    slides: {
+      type: "array",
+      default: []
     }
   },
   edit: EditComponent,
@@ -183,16 +187,61 @@ function EditComponent(props) {
     api,
     showTitle,
     showExcerpt,
-    showThumbnail
+    showThumbnail,
+    slides
   } = attributes;
   const [posts, setPosts] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)([]);
+  const [currentIndex, setCurrentIndex] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useState)(0);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+    const lastIndex = slides.length - 1;
+    if (currentIndex < 0) {
+      setCurrentIndex(lastIndex);
+    }
+    if (currentIndex > lastIndex) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, slides.length]);
+  (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
+    if (!autoScroll) return;
+    let slider = setInterval(() => {
+      setCurrentIndex(currentIndex + 1);
+    }, 5000);
+    return () => {
+      clearInterval(slider);
+    };
+  }, [autoScroll, currentIndex]);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_3__.useEffect)(() => {
     if (api) {
-      fetch(`${api}/wp-json/wp/v2/posts`).then(response => response.json()).then(data => console.log(data));
+      fetch(`${api}/wp-json/wp/v2/posts`).then(response => response.json()).then(data => {
+        setPosts(data);
+        const slides = getSlideData(data);
+        setAttributes({
+          slides: [...slides]
+        });
+      });
     }
   }, [api]);
+  const getSlideData = posts => {
+    const temp = [];
+    posts.forEach(post => {
+      const postData = {};
+      fetch(post._links["wp:featuredmedia"][0].href).then(response => response.json()).then(data => {
+        postData["thumbnail"] = data.guid.rendered;
+      });
+      postData["title"] = post.title.rendered;
+      postData["excerpt"] = post.excerpt.rendered;
+      postData["date"] = post.date;
+      temp.push(postData);
+    });
+    return temp;
+  };
+  const handleNextSlide = () => {
+    setCurrentIndex(prevIndex => (prevIndex + 1) % slides.length);
+  };
+  const handlePrevSlide = () => {
+    setCurrentIndex(prevIndex => prevIndex === 0 ? slides.length - 1 : prevIndex - 1);
+  };
   const setURL = value => {
-    console.log(value);
     setAttributes({
       api: value
     });
@@ -239,27 +288,42 @@ function EditComponent(props) {
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
       ...blockProps,
-      children: posts.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
-        className: "cps-slideshow",
-        children: posts.map(post => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          className: "cps-slide",
-          children: [showTitle && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
-              href: post.link,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              children: post.title.rendered
-            })
-          }), showThumbnail && post._embedded["wp:featuredmedia"] && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
-            src: post._embedded["wp:featuredmedia"][0].source_url,
-            alt: post.title.rendered
-          }), showExcerpt && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-            children: post.excerpt.rendered.replace(/(<([^>]+)>)/gi, "")
-          }), showMeta && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-            children: new Date(post.date).toLocaleDateString()
+      children: slides.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+          className: "slideshow-container",
+          children: slides.map((slide, index) => {
+            let position = "nextSlide";
+            if (index === currentIndex) {
+              position = "activeSlide";
+            }
+            if (index === currentIndex - 1 || currentIndex === 0 && index === slides.length - 1) {
+              position = "lastSlide";
+            }
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("article", {
+              className: position,
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
+                src: slide.thumbnail,
+                alt: slide.title
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
+                children: slide.title
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                children: slide.date
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
+                children: slide.excerpt
+              })]
+            }, slide.title);
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "controls",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
+            onClick: handlePrevSlide,
+            children: "Previous"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
+            onClick: handleNextSlide,
+            children: "Next"
           })]
-        }, post.id))
-      }) : api || posts.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+        })]
+      }) : api || slides.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Loading posts...", "custom-post-slideshow")
       }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
         children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)("Please enter URL to fetch posts from", "custom-post-slideshow")

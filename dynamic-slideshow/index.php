@@ -20,7 +20,7 @@ class DynamicSlideShow
 
   function adminAssets()
   {
-    wp_register_style('slideshowCSS', plugin_dir_url(__FILE__) . 'src/style/editor.css');
+    wp_register_style('slideshowCSS', plugin_dir_url(__FILE__) . './src/style/editor.css');
     wp_register_script('slideshowJS', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks', 'wp-element', 'wp-editor'));
     register_block_type('customblock/slideshow', array(
       'editor_script' => 'slideshowJS',

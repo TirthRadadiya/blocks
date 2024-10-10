@@ -28,6 +28,10 @@ wp.blocks.registerBlockType("customblock/slideshow", {
       type: "string",
       default: "", // Allow users to input a custom URL
     },
+    slides: {
+      type: "array",
+      default: [],
+    },
   },
   edit: EditComponent,
   save: function () {
@@ -37,19 +41,75 @@ wp.blocks.registerBlockType("customblock/slideshow", {
 
 function EditComponent(props) {
   const { attributes, setAttributes } = props;
-  const { autoScroll, api, showTitle, showExcerpt, showThumbnail } = attributes;
+  const { autoScroll, api, showTitle, showExcerpt, showThumbnail, slides } =
+    attributes;
   const [posts, setPosts] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const lastIndex = slides.length - 1;
+    if (currentIndex < 0) {
+      setCurrentIndex(lastIndex);
+    }
+    if (currentIndex > lastIndex) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, slides.length]);
+
+  useEffect(() => {
+    if (!autoScroll) return;
+    let slider = setInterval(() => {
+      setCurrentIndex(currentIndex + 1);
+    }, 5000);
+    return () => {
+      clearInterval(slider);
+    };
+  }, [autoScroll, currentIndex]);
 
   useEffect(() => {
     if (api) {
       fetch(`${api}/wp-json/wp/v2/posts`)
         .then((response) => response.json())
-        .then((data) => console.log(data));
+        .then((data) => {
+          setPosts(data);
+          const slides = getSlideData(data);
+          setAttributes({ slides: [...slides] });
+        });
     }
   }, [api]);
 
+  const getSlideData = (posts) => {
+    const temp = [];
+
+    posts.forEach((post) => {
+      const postData = {};
+      fetch(post._links["wp:featuredmedia"][0].href)
+        .then((response) => response.json())
+        .then((data) => {
+          postData["thumbnail"] = data.guid.rendered;
+        });
+
+      postData["title"] = post.title.rendered;
+      postData["excerpt"] = post.excerpt.rendered;
+      postData["date"] = post.date;
+
+      temp.push(postData);
+    });
+
+    return temp;
+  };
+
+  const handleNextSlide = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+  };
+
+  const handlePrevSlide = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? slides.length - 1 : prevIndex - 1
+    );
+  };
+
   const setURL = (value) => {
-    console.log(value);
     setAttributes({ api: value });
   };
 
@@ -97,35 +157,52 @@ function EditComponent(props) {
         </PanelBody>
       </InspectorControls>
       <div {...blockProps}>
-        {posts.length > 0 ? (
-          <div className="cps-slideshow">
-            {posts.map((post) => (
-              <div className="cps-slide" key={post.id}>
-                {showTitle && (
-                  <h3>
-                    <a
-                      href={post.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {post.title.rendered}
-                    </a>
-                  </h3>
-                )}
-                {showThumbnail && post._embedded["wp:featuredmedia"] && (
-                  <img
-                    src={post._embedded["wp:featuredmedia"][0].source_url}
-                    alt={post.title.rendered}
-                  />
-                )}
-                {showExcerpt && (
-                  <p>{post.excerpt.rendered.replace(/(<([^>]+)>)/gi, "")}</p>
-                )}
-                {showMeta && <p>{new Date(post.date).toLocaleDateString()}</p>}
-              </div>
-            ))}
+        {slides.length > 0 ? (
+          <div>
+            <div className="slideshow-container">
+              {slides.map((slide, index) => {
+                let position = "nextSlide";
+                if (index === currentIndex) {
+                  position = "activeSlide";
+                }
+                if (
+                  index === currentIndex - 1 ||
+                  (currentIndex === 0 && index === slides.length - 1)
+                ) {
+                  position = "lastSlide";
+                }
+                return (
+                  <article className={position} key={slide.title}>
+                    <img src={slide.thumbnail} alt={slide.title} />
+                    <h2>{slide.title}</h2>
+                    <p>{slide.date}</p>
+                    <>{slide.excerpt}</>
+                  </article>
+                );
+              })}
+              {/* {slides.map((slide, index) => (
+                <div
+                  key={index}
+                  className={`slide ${index === currentIndex ? "active" : ""} ${
+                    direction === "next" ? "slide-next" : "slide-prev"
+                  }`}
+                >
+                  <img src={slide.thumbnail} alt={slide.title} />
+                  <h2>{slide.title}</h2>
+                  <p>{slide.date}</p>
+                  <>{slide.excerpt}</>
+                </div>
+
+
+              ))} */}
+            </div>
+
+            <div className="controls">
+              <button onClick={handlePrevSlide}>Previous</button>
+              <button onClick={handleNextSlide}>Next</button>
+            </div>
           </div>
-        ) : (api || posts.length === 0) ? (
+        ) : api || slides.length === 0 ? (
           <p>{__("Loading posts...", "custom-post-slideshow")}</p>
         ) : (
           <p>
