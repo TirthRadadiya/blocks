@@ -144,7 +144,7 @@ __webpack_require__.r(__webpack_exports__);
 
 wp.blocks.registerBlockType("customblock/slideshow", {
   title: "SlideShow",
-  icon: "smiley",
+  icon: "images-alt2",
   category: "common",
   attributes: {
     showTitle: {
@@ -205,7 +205,7 @@ function EditComponent(props) {
     if (!autoScroll) return;
     let slider = setInterval(() => {
       setCurrentIndex(currentIndex + 1);
-    }, 5000);
+    }, 2500);
     return () => {
       clearInterval(slider);
     };
@@ -221,6 +221,13 @@ function EditComponent(props) {
       });
     }
   }, [api]);
+  function removeHtmlAndBrackets(str) {
+    // Remove HTML tags
+    let cleanStr = str.replace(/<\/?[^>]+(>|$)/g, "");
+    // Remove brackets but keep the content inside
+    cleanStr = cleanStr.replace(/[\[\]\(\)\{\}]/g, "");
+    return cleanStr.trim();
+  }
   const getSlideData = posts => {
     const temp = [];
     posts.forEach(post => {
@@ -229,7 +236,8 @@ function EditComponent(props) {
         postData["thumbnail"] = data.guid.rendered;
       });
       postData["title"] = post.title.rendered;
-      postData["excerpt"] = post.excerpt.rendered;
+      postData["excerpt"] = removeHtmlAndBrackets(post.excerpt.rendered);
+      postData["temp"] = post.excerpt.rendered;
       postData["date"] = post.date;
       temp.push(postData);
     });
@@ -288,7 +296,7 @@ function EditComponent(props) {
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
       ...blockProps,
-      children: slides.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+      children: slides.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "slideshow-container",
           children: slides.map((slide, index) => {
@@ -303,24 +311,32 @@ function EditComponent(props) {
               className: position,
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
                 src: slide.thumbnail,
-                alt: slide.title
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h2", {
-                children: slide.title
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
-                children: slide.date
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-                children: slide.excerpt
+                alt: slide.title,
+                className: "person-img"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+                className: "slider-content",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h4", {
+                  children: slide.title
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "title",
+                  children: slide.date
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {
+                  className: "text",
+                  children: slide.excerpt
+                })]
               })]
             }, slide.title);
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "controls",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
+            className: "prev",
             onClick: handlePrevSlide,
-            children: "Previous"
+            children: "<"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
+            className: "next",
             onClick: handleNextSlide,
-            children: "Next"
+            children: ">"
           })]
         })]
       }) : api || slides.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("p", {

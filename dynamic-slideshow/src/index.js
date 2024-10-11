@@ -5,7 +5,7 @@ import { useEffect, useState } from "@wordpress/element";
 
 wp.blocks.registerBlockType("customblock/slideshow", {
   title: "SlideShow",
-  icon: "smiley",
+  icon: "images-alt2",
   category: "common",
   attributes: {
     showTitle: {
@@ -60,7 +60,7 @@ function EditComponent(props) {
     if (!autoScroll) return;
     let slider = setInterval(() => {
       setCurrentIndex(currentIndex + 1);
-    }, 5000);
+    }, 2500);
     return () => {
       clearInterval(slider);
     };
@@ -78,6 +78,14 @@ function EditComponent(props) {
     }
   }, [api]);
 
+  function removeHtmlAndBrackets(str) {
+    // Remove HTML tags
+    let cleanStr = str.replace(/<\/?[^>]+(>|$)/g, "");
+    // Remove brackets but keep the content inside
+    cleanStr = cleanStr.replace(/[\[\]\(\)\{\}]/g, "");
+    return cleanStr.trim();
+}
+
   const getSlideData = (posts) => {
     const temp = [];
 
@@ -90,7 +98,8 @@ function EditComponent(props) {
         });
 
       postData["title"] = post.title.rendered;
-      postData["excerpt"] = post.excerpt.rendered;
+      postData["excerpt"] = removeHtmlAndBrackets(post.excerpt.rendered);
+      postData["temp"] = post.excerpt.rendered;
       postData["date"] = post.date;
 
       temp.push(postData);
@@ -98,6 +107,7 @@ function EditComponent(props) {
 
     return temp;
   };
+  
 
   const handleNextSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
@@ -158,7 +168,7 @@ function EditComponent(props) {
       </InspectorControls>
       <div {...blockProps}>
         {slides.length > 0 ? (
-          <div>
+          <>
             <div className="slideshow-container">
               {slides.map((slide, index) => {
                 let position = "nextSlide";
@@ -173,35 +183,26 @@ function EditComponent(props) {
                 }
                 return (
                   <article className={position} key={slide.title}>
-                    <img src={slide.thumbnail} alt={slide.title} />
-                    <h2>{slide.title}</h2>
-                    <p>{slide.date}</p>
-                    <>{slide.excerpt}</>
+                    <img
+                      src={slide.thumbnail}
+                      alt={slide.title}
+                      className="person-img"
+                    />
+                    <div className="slider-content">
+                      <h4>{slide.title}</h4>
+                      <p className="title">{slide.date}</p>
+                      <p className="text">{slide.excerpt}</p>
+                    </div>
                   </article>
                 );
               })}
-              {/* {slides.map((slide, index) => (
-                <div
-                  key={index}
-                  className={`slide ${index === currentIndex ? "active" : ""} ${
-                    direction === "next" ? "slide-next" : "slide-prev"
-                  }`}
-                >
-                  <img src={slide.thumbnail} alt={slide.title} />
-                  <h2>{slide.title}</h2>
-                  <p>{slide.date}</p>
-                  <>{slide.excerpt}</>
-                </div>
-
-
-              ))} */}
             </div>
 
             <div className="controls">
-              <button onClick={handlePrevSlide}>Previous</button>
-              <button onClick={handleNextSlide}>Next</button>
+              <button className="prev" onClick={handlePrevSlide}>&lt;</button>
+              <button className="next" onClick={handleNextSlide}>&gt;</button>
             </div>
-          </div>
+          </>
         ) : api || slides.length === 0 ? (
           <p>{__("Loading posts...", "custom-post-slideshow")}</p>
         ) : (

@@ -32,14 +32,34 @@ class DynamicSlideShow
   function theHTML($attributes)
   {
     if (!is_admin()) {
-      // wp_enqueue_script('attentionFrontend', plugin_dir_url(__FILE__) . './build/frontend.js', array('wp-element'));
-      wp_enqueue_style('frontendStyle', plugin_dir_url(__FILE__) . './src/style/frontend.css');
-    }    
+      wp_enqueue_script('frontendJS', plugin_dir_url(__FILE__) . './src/frontend.js', array('wp-element'));
+      wp_enqueue_style('frontendStyle', plugin_dir_url(__FILE__) . './src/style/editor.css');
+    }
+    // print_r($attributes);
+    ?>
 
-    ob_start(); ?>
-    <div class="paying-attention-update-me">frontend code here</div>
-    <?php return ob_get_clean();
-  }
+    <div class="slideshow-container">
+      <?php foreach ($attributes['slides'] as $key => $slide) {
+        ?>
+        <article class="<?php if ($key == 0)
+          echo "activeSlide" ?>" data-index="<?php echo $key ?>">
+          <img src='<?php echo $slide['thumbnail'] ?>' alt='<?php echo $slide['title'] ?>' class="person-img" />
+          <div class="slider-content">
+            <h4><?php echo $slide['title'] ?></h4>
+            <p class="title"><?php echo $slide['date'] ?></p>
+            <p class="text"><?php echo $slide['excerpt'] ?></p>
+          </div>
+        </article>
+        <?php
+      } ?>
+
+      <button class="prev">&lt;</button>
+      <button class="next">&gt;</button>
+
+    </div>
+
+
+  <?php }
 }
 
 new DynamicSlideShow();
