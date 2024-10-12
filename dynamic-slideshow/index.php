@@ -41,7 +41,7 @@ class DynamicSlideShow
     <div class="slideshow-container">
       <?php foreach ($attributes['slides'] as $key => $slide) {
         ?>
-        <article class="<?php if ($key == 0)
+        <article class="slide <?php if ($key == 0)
           echo "activeSlide" ?>" data-index="<?php echo $key ?>">
           <img src='<?php echo $slide['thumbnail'] ?>' alt='<?php echo $slide['title'] ?>' class="person-img" />
           <div class="slider-content">
