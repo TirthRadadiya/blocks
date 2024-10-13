@@ -39,6 +39,7 @@ class DynamicSlideShow
     wp_localize_script('frontendJS', 'attributes', array("autoScroll" => $autoScroll))
       ?>
 
+    <p class="mobile-indication"><span> &#8920; Swipe Left</span>&nbsp;&nbsp;<span>Swipe Right &#8921;</span></p>
     <div class="slideshow-container">
       <?php foreach ($attributes['slides'] as $key => $slide) {
         ?>

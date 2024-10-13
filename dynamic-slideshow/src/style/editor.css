@@ -66,7 +66,6 @@ Slider
 }
 .slideshow-container {
   margin: 0 auto;
-  margin-top: 4rem;
   width: 80vw;
   height: 600px;
   min-height: fit-content;
@@ -75,6 +74,10 @@ Slider
   position: relative;
   display: flex;
   overflow: hidden;
+
+  @media (min-width: 1124px) {
+    margin-top: 4rem;
+  }
 }
 .person-img {
   /* border-radius: 50%; */
@@ -123,6 +126,10 @@ article h4 {
   border-radius: var(--radius);
   cursor: pointer;
   transition: var(--transition);
+
+  @media (max-width: 1124px) {
+    display: none;
+  }
 }
 .prev:hover,
 .next:hover {
@@ -169,4 +176,14 @@ article.lastSlide {
 }
 article.nextSlide {
   transform: translateX(100%);
+}
+
+.mobile-indication {
+  display: none;
+  @media (max-width: 1124px) {
+    display: flex;
+    margin: auto;
+    justify-content: space-between;
+    padding: 10px 20px;
+  }
 }

@@ -47,6 +47,30 @@ document.addEventListener("DOMContentLoaded", function () {
     startAutoScroll();
   });
 
+  // Swipe Detection for Mobile
+  const slideContainer = document.querySelector(".slideshow-container");
+
+  slideContainer.addEventListener("touchstart", function (event) {
+    startX = event.touches[0].clientX; // Get initial touch position (X-axis)
+  });
+
+  slideContainer.addEventListener("touchmove", function (event) {
+    endX = event.touches[0].clientX; // Get position as finger moves (X-axis)
+  });
+
+  slideContainer.addEventListener("touchend", function () {
+    const deltaX = endX - startX; // Calculate the swipe distance
+
+    if (Math.abs(deltaX) > 50) {
+      // Check if swipe distance is significant
+      if (deltaX < 0) {
+        goToNextSlide(); // Swipe left (Next slide)
+      } else {
+        goToPrevSlide(); // Swipe right (Previous slide)
+      }
+    }
+  });
+
   // Start Auto-scroll when condition is met
   function startAutoScroll() {
     if (autoScrollEnabled) {
