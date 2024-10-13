@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
   const slides = document.querySelectorAll(".slide");
   let currentIndex = 0;
-  let autoScrollEnabled = true; // Condition to control auto-scroll
+
+  const autoScrollEnabled = attributes.autoScroll;
   let autoScrollInterval;
 
   // Initial Setup of Slides
@@ -34,20 +35,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Handle Next Button Click
   document.querySelector(".next").addEventListener("click", function () {
+    stopAutoScroll();
     goToNextSlide();
+    startAutoScroll();
   });
 
   // Handle Previous Button Click
   document.querySelector(".prev").addEventListener("click", function () {
+    stopAutoScroll();
     goToPrevSlide();
+    startAutoScroll();
   });
-
-  // Enable or Disable Auto-scroll based on condition
-  function checkAutoScrollCondition() {
-    // Add your condition logic here
-    // For example, enable auto-scroll based on a boolean or a user setting
-    autoScrollEnabled = true; // Assume condition is met and enable auto-scroll
-  }
 
   // Start Auto-scroll when condition is met
   function startAutoScroll() {
@@ -61,15 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
     clearInterval(autoScrollInterval);
   }
 
-  // Call the function to check for auto-scroll condition
-  checkAutoScrollCondition();
-
   // If auto-scroll is enabled, start it
   if (autoScrollEnabled) {
     startAutoScroll();
   }
-
-  // Optional: You can also stop auto-scroll when user interacts manually
-  document.querySelector(".next").addEventListener("click", stopAutoScroll);
-  document.querySelector(".prev").addEventListener("click", stopAutoScroll);
 });

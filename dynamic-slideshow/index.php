@@ -35,8 +35,9 @@ class DynamicSlideShow
       wp_enqueue_script('frontendJS', plugin_dir_url(__FILE__) . './src/frontend.js', array('wp-element'));
       wp_enqueue_style('frontendStyle', plugin_dir_url(__FILE__) . './src/style/editor.css');
     }
-    // print_r($attributes);
-    ?>
+    $autoScroll = @$attributes['autoScroll'] ? $attributes['autoScroll'] : null;
+    wp_localize_script('frontendJS', 'attributes', array("autoScroll" => $autoScroll))
+      ?>
 
     <div class="slideshow-container">
       <?php foreach ($attributes['slides'] as $key => $slide) {
