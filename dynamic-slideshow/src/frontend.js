@@ -78,6 +78,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Arrow Key Navigation
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "ArrowRight") {
+      goToNextSlide(); // Move to the next slide when the right arrow is pressed
+    } else if (event.key === "ArrowLeft") {
+      goToPrevSlide(); // Move to the previous slide when the left arrow is pressed
+    }
+  });
+
   // Stop Auto-scroll when needed
   function stopAutoScroll() {
     clearInterval(autoScrollInterval);
