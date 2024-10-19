@@ -12,5 +12,8 @@
   "license": "ISC",
   "devDependencies": {
     "@wordpress/scripts": "^30.1.0"
+  },
+  "dependencies": {
+    "html-react-parser": "^5.1.18"
   }
 }
