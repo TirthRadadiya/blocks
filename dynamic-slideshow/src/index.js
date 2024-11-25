@@ -207,19 +207,19 @@ function EditComponent( props ) {
                                 }
                                 return (
                                     <a href={slide.link} target='_blank'>
-										<article className={ position } key={ slide.title }>
-											<img
-												src={ slide.thumbnail }
-												alt={ slide.title }
-												className="person-img"
-											/>
-											<div className="slider-content">
-												<h4>{ parse(slide.title) }</h4>
-												<p className="title">{ parse(slide.date) }</p>
-												<p className="text">{ parse(slide.excerpt) }</p>
-											</div>
-										</article>
-									</a>
+					<article className={ position } key={ slide.title }>
+						<img
+							src={ slide.thumbnail }
+							alt={ slide.title }
+							className="person-img"
+						/>
+						<div className="slider-content">
+							<h4>{ parse(slide.title) }</h4>
+							<p className="title">{ parse(slide.date) }</p>
+							<p className="text">{ parse(slide.excerpt) }</p>
+						</div>
+					</article>
+				     </a>
                                 );
                             } ) }
                         </div>
